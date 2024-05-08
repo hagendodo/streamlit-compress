@@ -22,7 +22,7 @@ def compress_image(input_file, quality=50):
         img = img.convert("RGB")
     
     output_buffer = io.BytesIO()
-    img.save(output_buffer, format='JPEG', quality=quality)
+    img.save(output_buffer, format='auto', quality=quality)
     return img
 
 # Main function
@@ -76,7 +76,7 @@ def main():
             
             # Display compressed image
             st.write("### Compressed Image")
-            st.image(compressed_image, caption="Compressed Image", use_column_width=True, format='JPEG')
+            st.image(compressed_image, caption="Compressed Image", use_column_width=True, format='auto')
             
             # Download button for compressed image
             st.write("### Download Compressed Image")

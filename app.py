@@ -25,18 +25,17 @@ def compress_image(input_file, quality=50):
     img.save(output_buffer, format='JPEG', quality=quality)
     return output_buffer.getvalue()
 
-# Main function
-def main():
-    st.title("File Compression App (1217050116)")
+# Define page for audio compression
+def audio_compression():
+    st.title("Audio Compression")
     
     # Sidebar
     st.sidebar.title("Settings")
     audio_bitrate = st.sidebar.selectbox("Select audio bitrate", ["64k", "128k", "192k", "256k", "320k"])
-    image_quality = st.sidebar.slider("Select image quality", min_value=1, max_value=100, value=50)
     
     # Main content
     st.write("""
-    ## Upload your files and compress them!
+    ## Upload your audio file and compress it!
     """)
     
     # File upload - audio
@@ -58,6 +57,19 @@ def main():
             st.write("### Download Compressed Audio")
             audio_download_button_str = f"Download Compressed Audio File ({os.path.splitext(audio_file.name)[0]}_compressed.mp3)"
             st.download_button(label=audio_download_button_str, data=compressed_audio, file_name=f"{os.path.splitext(audio_file.name)[0]}_compressed.mp3", mime="audio/mpeg", key=None)
+
+# Define page for image compression
+def image_compression():
+    st.title("Image Compression")
+    
+    # Sidebar
+    st.sidebar.title("Settings")
+    image_quality = st.sidebar.slider("Select image quality", min_value=1, max_value=100, value=50)
+    
+    # Main content
+    st.write("""
+    ## Upload your image file and compress it!
+    """)
     
     # File upload - image
     image_file = st.file_uploader("Upload an image file", type=["jpg", "jpeg", "png"])
@@ -79,7 +91,19 @@ def main():
             image_download_button_str = f"Download Compressed Image File"
             st.download_button(label=image_download_button_str, data=compressed_image, file_name=f"{os.path.splitext(image_file.name)[0]}_compressed.jpg", mime="image/jpeg", key=None)
 
+# Multipage function
+def multipage():
+    pages = {
+        "Audio Compression": audio_compression,
+        "Image Compression": image_compression
+    }
+    
+    st.sidebar.title("Choose a page")
+    page_selection = st.sidebar.radio("Go to", list(pages.keys()))
+    
+    page = pages[page_selection]
+    page()
 
 # Run the app
 if __name__ == '__main__':
-    main()
+    multipage()

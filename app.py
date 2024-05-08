@@ -37,7 +37,12 @@ def main():
             st.write("Compressing...")
             compressed_audio = compress_audio(audio_file, bitrate=bitrate)
             st.success("Compression successful!")
-            st.audio(compressed_audio, format='audio/mp3', start_time=0)
+            
+            # Download button for the compressed audio
+            st.write("### Download Compressed Audio")
+            download_button_str = f"Download Compressed Audio File ({os.path.splitext(audio_file.name)[0]}_compressed.mp3)"
+            st.download_button(label=download_button_str, data=compressed_audio, file_name=f"{os.path.splitext(audio_file.name)[0]}_compressed.mp3", mime="audio/mpeg", key=None)
+
 
 # Run the app
 if __name__ == '__main__':

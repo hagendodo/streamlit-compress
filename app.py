@@ -98,7 +98,8 @@ def multipage():
         "Image Compression": image_compression
     }
     
-    st.sidebar.title("Choose a page")
+    st.sidebar.title("AICOMPY - 1217050116")
+    st.sidebar.write("Raden Ibnu Huygenz Widodo")
     page_selection = st.sidebar.radio("Go to", list(pages.keys()))
     
     page = pages[page_selection]

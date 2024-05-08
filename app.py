@@ -15,15 +15,15 @@ def compress_audio(input_file, bitrate='64k'):
 # Function to compress image
 def compress_image(input_file, quality=50):
     img = Image.open(input_file)
-    output_buffer = io.BytesIO()
     img_format = input_file.name.split(".")[-1].lower()
     
     if img_format not in ["jpg", "jpeg"]:
         st.warning("Only JPEG format is supported for compression. Converting the image to JPEG...")
         img = img.convert("RGB")
     
+    output_buffer = io.BytesIO()
     img.save(output_buffer, format='JPEG', quality=quality)
-    return output_buffer.getvalue()
+    return img
 
 # Main function
 def main():
@@ -76,12 +76,13 @@ def main():
             
             # Display compressed image
             st.write("### Compressed Image")
-            st.image(io.BytesIO(compressed_image), caption="Compressed Image", use_column_width=True, format='JPEG')
+            st.image(compressed_image, caption="Compressed Image", use_column_width=True, format='JPEG')
             
             # Download button for compressed image
             st.write("### Download Compressed Image")
-            image_download_button_str = f"Download Compressed Image File"
+            image_download_button_str = f"Download Compressed Image File ({os.path.splitext(image_file.name)[0]}_compressed.jpg)"
             st.download_button(label=image_download_button_str, data=compressed_image, file_name=f"{os.path.splitext(image_file.name)[0]}_compressed.jpg", mime="image/jpeg", key=None)
+
 
 # Run the app
 if __name__ == '__main__':

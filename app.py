@@ -69,15 +69,15 @@ def main():
         st.write(image_details)
         
         # Compress image button
-if st.button("Compress Image"):
-    st.write("Compressing image...")
-    compressed_image = compress_image(image_file, quality=image_quality)
-    st.success("Image compression successful!")
-    
-    # Download button for compressed image
-    st.write("### Download Compressed Image")
-    image_download_button_str = f"Download Compressed Image File"
-    st.download_button(label=image_download_button_str, data=compressed_image, file_name=f"{os.path.splitext(image_file.name)[0]}_compressed.jpg", mime="image/jpeg", key=None)
+        if st.button("Compress Image"):
+            st.write("Compressing image...")
+            compressed_image = compress_image(image_file, quality=image_quality)
+            st.success("Image compression successful!")
+            
+            # Download button for compressed image
+            st.write("### Download Compressed Image")
+            image_download_button_str = f"Download Compressed Image File"
+            st.download_button(label=image_download_button_str, data=compressed_image, file_name=f"{os.path.splitext(image_file.name)[0]}_compressed.jpg", mime="image/jpeg", key=None)
 
 
 # Run the app

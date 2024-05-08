@@ -21,7 +21,7 @@ def compress_image(input_file, quality=50):
 
 # Main function
 def main():
-    st.title("File Compression App")
+    st.title("File Compression App (1217050116)")
     
     # Sidebar
     st.sidebar.title("Settings")

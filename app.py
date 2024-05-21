@@ -6,7 +6,7 @@ from moviepy.editor import VideoFileClip
 import io
 import tempfile
 
-Image.ANTIALIAS = Image.LANCZOS
+#Image.ANTIALIAS = Image.LANCZOS
 
 def compress_audio(input_file, bitrate='64k'):
     audio = AudioSegment.from_file(input_file)

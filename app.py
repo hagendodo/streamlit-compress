@@ -5,7 +5,9 @@ from PIL import Image
 from moviepy.editor import VideoFileClip
 import io
 import tempfile
-import PIL PIL.Image.ANTIALIAS = PIL.Image.LANCZOS
+import PIL 
+
+PIL.Image.ANTIALIAS = PIL.Image.LANCZOS
 
 def compress_audio(input_file, bitrate='64k'):
     audio = AudioSegment.from_file(input_file)

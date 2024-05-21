@@ -27,25 +27,39 @@ def compress_image(input_file, quality=50):
 
 def compress_video(input_file, target_resolution=(480, 270), bitrate='500k'):
     try:
-        tfile = tempfile.NamedTemporaryFile(delete=False)
-        tfile.write(input_file.read())
-        tfile.close()
-
-        video = VideoFileClip(tfile.name)
+        # Use BytesIO to handle in-memory file
+        tfile = io.BytesIO(input_file.read())
+        
+        # Write the BytesIO content to a temporary file
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_file.write(tfile.getbuffer())
+            temp_filename = temp_file.name
+        
+        # Process the video using moviepy
+        video = VideoFileClip(temp_filename)
         video_resized = video.resize(height=target_resolution[1])
-        temp_output_file = f"{os.path.splitext(input_file.name)[0]}_compressed.mp4"
-        video_resized.write_videofile(temp_output_file, bitrate=bitrate, codec='libx264')
+        
+        # Write the resized video to another temporary file
+        temp_output_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
+        temp_output_filename = temp_output_file.name
+        temp_output_file.close()
+        
+        video_resized.write_videofile(temp_output_filename, bitrate=bitrate, codec='libx264')
 
-        with open(temp_output_file, "rb") as f:
+        # Read the compressed video back into memory
+        with open(temp_output_filename, "rb") as f:
             compressed_video = f.read()
-        os.remove(temp_output_file)
+
+        # Clean up temporary files
+        os.remove(temp_filename)
+        os.remove(temp_output_filename)
+
         return compressed_video
+
     except Exception as e:
+        # Handle errors
         st.error(f"Error compressing video: {e}")
         return None
-    finally:
-        if os.path.exists(tfile.name):
-            os.remove(tfile.name)
 
 def audio_compression():
     st.title("Audio Compression")
@@ -118,12 +132,14 @@ def video_compression():
         if st.button("Compress Video"):
             st.write("Compressing video...")
             compressed_video = compress_video(video_file, target_resolution=resolutions[target_resolution], bitrate=video_bitrate)
-            st.success("Video compression successful!")
+
+            if compressed_video:
+                st.success("Video compression successful!")
                 
-            st.write("### Download Compressed Video")
-            video_download_button_str = f"Download Compressed Video File ({os.path.splitext(video_file.name)[0]}_compressed.mp4)"
-            st.download_button(label=video_download_button_str, data=compressed_video, file_name=f"{os.path.splitext(video_file.name)[0]}_compressed.mp4", mime="video/mp4", key=None)
-            
+                st.write("### Download Compressed Video")
+                video_download_button_str = f"Download Compressed Video File ({os.path.splitext(video_file.name)[0]}_compressed.mp4)"
+                st.download_button(label=video_download_button_str, data=compressed_video, file_name=f"{os.path.splitext(video_file.name)[0]}_compressed.mp4", mime="video/mp4", key=None)
+
 def multipage():
     pages = {
         "Audio Compression": audio_compression,

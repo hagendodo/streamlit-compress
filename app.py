@@ -5,6 +5,7 @@ from PIL import Image
 from moviepy.editor import VideoFileClip
 import io
 import tempfile
+import ffmpeg
 
 #Image.ANTIALIAS = Image.LANCZOS
 
@@ -32,35 +33,26 @@ def compress_video(input_file, target_resolution=(480, 270), bitrate='500k'):
         # Use BytesIO to handle in-memory file
         tfile = io.BytesIO(input_file.read())
         
-        # Write the BytesIO content to a temporary file
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            temp_file.write(tfile.getbuffer())
-            temp_filename = temp_file.name
+        # Load the video from the in-memory file
+        tfile.seek(0)
+        video = VideoFileClip(tfile)
         
-        # Process the video using moviepy
-        video = VideoFileClip(temp_filename)
+        # Resize the video
         video_resized = video.resize(height=target_resolution[1])
         
-        # Write the resized video to another temporary file
-        temp_output_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
-        temp_output_filename = temp_output_file.name
-        temp_output_file.close()
+        # Save the resized video to a BytesIO object
+        output_buffer = io.BytesIO()
         
-        video_resized.write_videofile(temp_output_filename, bitrate=bitrate, codec='libx264')
-
-        # Read the compressed video back into memory
-        with open(temp_output_filename, "rb") as f:
-            compressed_video = f.read()
-
-        # Clean up temporary files
-        os.remove(temp_filename)
-        os.remove(temp_output_filename)
-
-        return compressed_video
+        # Write the resized video to the BytesIO object using ffmpeg
+        video_resized.write_videofile(output_buffer, codec='libx264', bitrate=bitrate, audio_codec='aac', temp_audiofile='temp-audio.m4a', remove_temp=True)
+        
+        # Move the buffer's cursor to the beginning
+        output_buffer.seek(0)
+        
+        return output_buffer.read()
 
     except Exception as e:
-        # Handle errors
-        st.error(f"Error compressing video: {e}")
+        print(f"Error compressing video: {e}")
         return None
 
 def audio_compression():

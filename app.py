@@ -7,8 +7,6 @@ import io
 import tempfile
 import ffmpeg
 
-#Image.ANTIALIAS = Image.LANCZOS
-
 def compress_audio(input_file, bitrate='64k'):
     audio = AudioSegment.from_file(input_file)
     compressed_audio = audio.set_frame_rate(44100).set_channels(1)
@@ -30,26 +28,33 @@ def compress_image(input_file, quality=50):
 
 def compress_video(input_file, target_resolution=(480, 270), bitrate='500k'):
     try:
-        # Use BytesIO to handle in-memory file
-        tfile = io.BytesIO(input_file.read())
+        # Read the input file into a byte stream
+        input_bytes = input_file.read()
         
-        # Load the video from the in-memory file
-        tfile.seek(0)
-        video = VideoFileClip(tfile)
+        # Set up input and output streams using ffmpeg
+        input_stream = ffmpeg.input('pipe:0')
+        output_stream = ffmpeg.output(
+            input_stream,
+            'pipe:1',
+            vcodec='libx264',
+            video_bitrate=bitrate,
+            vf=f'scale={target_resolution[0]}:{target_resolution[1]}',
+            format='mp4',
+            movflags='frag_keyframe+empty_moov'
+        )
         
-        # Resize the video
-        video_resized = video.resize(height=target_resolution[1])
+        # Run ffmpeg to process the video
+        process = ffmpeg.run_async(
+            output_stream,
+            pipe_stdin=True,
+            pipe_stdout=True,
+            pipe_stderr=True
+        )
         
-        # Save the resized video to a BytesIO object
-        output_buffer = io.BytesIO()
+        # Pass input data to ffmpeg and get output
+        output_bytes, _ = process.communicate(input=input_bytes)
         
-        # Write the resized video to the BytesIO object using ffmpeg
-        video_resized.write_videofile(output_buffer, codec='libx264', bitrate=bitrate, audio_codec='aac', temp_audiofile='temp-audio.m4a', remove_temp=True)
-        
-        # Move the buffer's cursor to the beginning
-        output_buffer.seek(0)
-        
-        return output_buffer.read()
+        return output_bytes
 
     except Exception as e:
         print(f"Error compressing video: {e}")
